@@ -4,6 +4,6 @@ lines = tuple(fin)
 
 for line in lines:
   line = line.split(",")
-  if len(line) >= 4: fout.write("|"+ line[1]+"|,|"+ line[4] + "|\n")
+  if len(line) >= 4: fout.write("|"+ line[1].replace('"','')+"|,|"+ line[4].replace('"','').replace('\n','') + "|" + " \n")
 
 fout.close()
