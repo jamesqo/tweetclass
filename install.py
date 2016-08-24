@@ -26,27 +26,20 @@
 import csv, getpass, json, os, time, urllib
 import oauth2 as oauth
 
-CONSUMER_KEY = 'Your twitter app key'
-CONSUMER_SECRET = 'Your twitter app secret'
-ACCESS_KEY = 'Your access token key'
-ACCESS_SECRET = 'Your access token secret'
+CONSUMER_KEY = 'NeXgm8reWPo5QbKBQLT99xYAf'
+CONSUMER_SECRET = '3eWDPEkEDc0A7izJpJE1SYMED7nkTukPIXVk0hmFW33H573YfF'
+ACCESS_KEY = '171007935-RxVOq0f82iQfTCtQp3PpOLwkYYoV8Inluaf9vnnA'
+ACCESS_SECRET = 'ADkkV2XMn7e2fsl3xANUgo1n7NNWbiPoNplmo0B97JrGc'
 
 def get_user_params():
 
     user_params = {}
 
-    # get user input params
-    user_params['inList']  = raw_input( '\nInput file [./corpus.csv]: ' )
-    user_params['outList'] = raw_input( 'Results file [./full-corpus.csv]: ' )
-    user_params['rawDir']  = raw_input( 'Raw data dir [./rawdata/]: ' )
-    
     # apply defaults
-    if user_params['inList']  == '': 
-        user_params['inList'] = './corpus.csv'
-    if user_params['outList'] == '': 
-        user_params['outList'] = './full-corpus.csv'
-    if user_params['rawDir']  == '': 
-        user_params['rawDir'] = './rawdata/'
+    user_params['inList'] = './corpus.csv'
+    user_params['outList'] = './full-corpus.csv'
+    user_params['rawDir'] = './rawdata/'
+
 
     return user_params
 
@@ -110,7 +103,7 @@ def get_time_left_str( cur_idx, fetch_list, download_pause ):
 
 def oauth_get_tweet(tid, http_method="GET", post_body='',
         http_headers=None):
-    url = 'http://api.twitter.com/1.1/statuses/show.json?id=' + tid
+    url = 'https://api.twitter.com/1.1/statuses/show.json?id=' + tid
     consumer = oauth.Consumer(key=CONSUMER_KEY, secret=CONSUMER_SECRET)
     token = oauth.Token(key=ACCESS_KEY, secret=ACCESS_SECRET)
     client = oauth.Client(consumer, token)
