@@ -4,12 +4,14 @@ import pandas as pd
 
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
+from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import LabelBinarizer, label_binarize
+
+from NBTweetClassifier import NBTweetClassifier
 
 def main():
     # Goal of program: train multiple classifiers and cross-validate each.
     # Output scores of classifiers on a test set.
-    # Multiclass prediction will be handled using OvA.
 
     X = pd.read_csv('full-corpus.csv')
 
@@ -33,17 +35,16 @@ def main():
                                                         test_size=0.2,
                                                         random_state=42)
 
-    #print(X_train.head(n=10))
-    #print(Y_train.head(n=10))
+    for df in X_train, X_test, Y_train, Y_test:
+        df.reset_index(drop=True, inplace=True)
 
-    bayes_clf = NBClassifier()
-    ovr_clf = OneVsRestClassifier(bayes_clf)
+    bayes_clf = NBTweetClassifier()
 
-    ovr_clf.fit(X_train, Y_train)
-    Y_predict = ovr_clf.predict(X_test)
-    score = accuracy_score(Y_test, Y_predict)
+    bayes_clf.fit(X_train, Y_train)
+    Y_predict = bayes_clf.predict(X_test)
 
-    print(f"NBClassifier + OvA score: {score}")
+    #score = accuracy_score(Y_test, Y_predict)
+    #print(f"NBClassifier + OvA score: {score}")
 
 if __name__ == '__main__':
     main()
