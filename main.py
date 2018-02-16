@@ -21,14 +21,14 @@ def parse_args():
     )
     return parser.parse_args()
 
-def main():
-    # Goal of program: train multiple classifiers and cross-validate each.
-    # Output scores of classifiers on a test set.
+def load_dataset(name):
+    if name == 'stanford':
+        pass
+    elif name == 'san-analytics':
+        return load_san_analytics_dataset()
 
-    args = parse_args()
-    log.basicConfig(level=args.log_level)
-
-    X = pd.read_csv('full-corpus.csv')
+def load_san_analytics_dataset():
+    X = pd.read_csv('san-analytics/full-corpus.csv')
 
     y = X['Sentiment']
     X.drop('Sentiment', axis=1, inplace=True)
@@ -46,20 +46,34 @@ def main():
     X = pd.concat([X, X_topic_bin], axis=1)
     '''
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y,
-                                                        test_size=0.2,
-                                                        random_state=42)
+    X.rename(columns={'TweetText': 'tweet_text'}, inplace=True)
+    y.rename('sentiment', inplace=True)
 
-    for df in X_train, X_test, y_train, y_test:
-        df.reset_index(drop=True, inplace=True)
+    return X, y
 
-    bayes_clf = NBTweetClassifier()
+def main():
+    # Goal of program: train multiple classifiers and cross-validate each.
+    # Output scores of classifiers on a test set.
 
-    bayes_clf.fit(X_train, y_train)
-    y_predict = bayes_clf.predict(X_test)
+    args = parse_args()
+    log.basicConfig(level=args.log_level)
 
-    score = accuracy_score(y_test, y_predict)
-    print(f"NBTweetClassifier score: {score}")
+    for ds_name in 'san-analytics', 'stanford':
+        X, y = load_dataset(ds_name)
+        X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                            test_size=0.2,
+                                                            random_state=42
+                                                            )
+        for df in X_train, X_test, y_train, y_test:
+            df.reset_index(drop=True, inplace=True)
+
+        bayes_clf = NBTweetClassifier()
+
+        bayes_clf.fit(X_train, y_train)
+        y_predict = bayes_clf.predict(X_test)
+
+        score = accuracy_score(y_test, y_predict)
+        print(f"{ds_name} | NBTweetClassifier score: {score}")
 
 if __name__ == '__main__':
     main()

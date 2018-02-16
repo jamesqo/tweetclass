@@ -13,7 +13,7 @@ class NBTweetClassifier(BaseEstimator):
         pass
     
     def fit(self, X, y):
-        tweets = X['TweetText']
+        tweets = X['tweet_text']
         num_instances = X.shape[0]
 
         self.vocab_ = _extract_vocab(tweets)
@@ -45,7 +45,7 @@ class NBTweetClassifier(BaseEstimator):
                     self.term_probas_[key] = (term_freq + 1) / denom
     
     def predict(self, X):
-        tweets = X['TweetText']
+        tweets = X['tweet_text']
         y = [self._predict(tweet, index) for index, tweet in enumerate(tweets)]
         return pd.Series(y)
     
