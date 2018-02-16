@@ -32,12 +32,11 @@ def main():
 
     y = X['Sentiment']
     X.drop('Sentiment', axis=1, inplace=True)
-    y_classes = list(set(y))
-    Y = label_binarize(y, classes=y_classes)
-    Y = pd.DataFrame(Y, columns=y_classes)
 
     X.drop(['TweetId', 'TweetDate'], axis=1, inplace=True)
+    X.drop('Topic', axis=1, inplace=True) # TODO: Make use of this column.
 
+    '''
     lb = LabelBinarizer()
     X_topic = X['Topic']
     X_topic_bin = lb.fit_transform(X_topic)
@@ -45,18 +44,19 @@ def main():
 
     X.drop('Topic', axis=1, inplace=True)
     X = pd.concat([X, X_topic_bin], axis=1)
+    '''
 
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y,
+    X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                         test_size=0.2,
                                                         random_state=42)
 
-    for df in X_train, X_test, Y_train, Y_test:
+    for df in X_train, X_test, y_train, y_test:
         df.reset_index(drop=True, inplace=True)
 
     bayes_clf = NBTweetClassifier()
 
-    bayes_clf.fit(X_train, Y_train)
-    Y_predict = bayes_clf.predict(X_test)
+    bayes_clf.fit(X_train, y_train)
+    y_predict = bayes_clf.predict(X_test)
 
     #score = accuracy_score(Y_test, Y_predict)
     #print(f"NBClassifier + OvA score: {score}")
