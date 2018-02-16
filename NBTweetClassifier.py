@@ -13,6 +13,8 @@ class NBTweetClassifier(BaseEstimator):
         pass
     
     def fit(self, X, y):
+        log.debug("fit() called")
+
         tweets = X['tweet_text']
         num_instances = X.shape[0]
 
@@ -23,28 +25,31 @@ class NBTweetClassifier(BaseEstimator):
         self.class_probas_ = self.class_freqs_ / num_instances
         self.class_term_counts_ = {}
 
-        self.term_freqs_ = {}
         self.term_probas_ = {}
 
+        # PERF: Indexing a pd.Series seems to take a long time, so preprocess it into a list.
+        y_list = list(y)
+
         for class_ in self.classes_:
-            tweets_for_class = [tweet for index, tweet in enumerate(tweets) if y[index] == class_]
+            tweets_for_class = [tweet for index, tweet in enumerate(tweets) if y_list[index] == class_]
             terms_for_class = ''.join(tweets_for_class).split()
             self.class_term_counts_[class_] = len(terms_for_class)
             denom = self.class_term_counts_[class_] + len(self.vocab_)
 
             log.debug("Computing T_{ct} for all terms in class '%s'", class_)
+            term_freqs = {}
             for term in terms_for_class:
-                key = (term, class_)
-                self.term_freqs_[key] = self.term_freqs_.get(key, 0) + 1
+                term_freqs[term] = term_freqs.get(term, 0) + 1
 
             log.debug("Computing P(t|c) for all terms in class '%s'", class_)
             for term in self.vocab_:
-                key = (term, class_)
-                if key in self.term_freqs_:
-                    term_freq = self.term_freqs_[key]
-                    self.term_probas_[key] = (term_freq + 1) / denom
+                if term in term_freqs:
+                    term_freq = term_freqs[term]
+                    self.term_probas_[(term, class_)] = (term_freq + 1) / denom
     
     def predict(self, X):
+        log.debug("predict() called")
+
         tweets = X['tweet_text']
         y = [self._predict(tweet, index) for index, tweet in enumerate(tweets)]
         return pd.Series(y)
@@ -53,7 +58,8 @@ class NBTweetClassifier(BaseEstimator):
         return max(self.classes_, key=lambda class_: self._score(class_, tweet, tweet_index))
     
     def _score(self, class_, tweet, tweet_index):
-        log.debug("Computing log P(c|d) for class '%s' for tweet #%d", class_, tweet_index)
+        # PERF: This takes too long, even for debug logging.
+        #log.debug("Computing log P(c|d) for class '%s' for tweet #%d", class_, tweet_index)
 
         score = np.log(self.class_probas_[class_])
         for term in tweet.split():

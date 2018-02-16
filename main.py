@@ -24,12 +24,9 @@ def parse_args():
 def load_dataset(name):
     log.debug(f"Loading {name} dataset")
     if name == 'san-analytics':
-        result = load_san_analytics_dataset()
+        return load_san_analytics_dataset()
     elif name == 'stanford':
-        result = load_stanford_dataset()
-    
-    log.debug(f"Finished loading {name} dataset")
-    return result
+        return load_stanford_dataset()
 
 def load_san_analytics_dataset():
     X = pd.read_csv('san-analytics/full-corpus.csv')
@@ -76,6 +73,8 @@ def main():
 
     for ds_name in 'san-analytics', 'stanford':
         X, y = load_dataset(ds_name)
+
+        log.debug("Splitting train and test data")
         X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                             test_size=0.2,
                                                             random_state=42
