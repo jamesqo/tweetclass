@@ -1,3 +1,5 @@
+import logging as log
+
 from sklearn.base import BaseEstimator
 
 def _extract_vocab(docs):
@@ -15,9 +17,11 @@ class NBTweetClassifier(BaseEstimator):
         self.vocab_ = _extract_vocab(tweets)
 
         self.class_probas_ = {}
+        self.term_freqs_ = {}
         self.term_probas_ = {}
 
         for class_ in Y.columns.values:
+            log.debug("Computing P(c) for class '%s'", class_)
             class_proba = sum(Y[class_]) / num_instances
             self.class_probas_[class_] = class_proba
 
@@ -25,9 +29,16 @@ class NBTweetClassifier(BaseEstimator):
             terms_for_class = ''.join(tweets_for_class).split()
             denom = len(terms_for_class) + len(self.vocab_)
 
+            log.debug("Computing T_{ct} for all terms in class '%s'", class_)
+            for term in terms_for_class:
+                key = (term, class_)
+                self.term_freqs_[key] = self.term_freqs_.get(key, 0) + 1
+
+            log.debug("Computing P(c) for all terms in class '%s'", class_)
             for term in self.vocab_:
-                term_count = terms_for_class.count(term)
-                self.term_probas_[(term, class_)] = (term_count + 1) / denom
+                key = (term, class_)
+                term_freq = self.term_freqs_.get(key, 0)
+                self.term_probas_[key] = (term_freq + 1) / denom
 
     def predict(self, X):
         pass

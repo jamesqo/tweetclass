@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import argparse
+import logging as log
 import pandas as pd
 
 from sklearn.metrics import accuracy_score
@@ -9,9 +11,22 @@ from sklearn.preprocessing import LabelBinarizer, label_binarize
 
 from NBTweetClassifier import NBTweetClassifier
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-d', '--debug',
+        help="Print debug information",
+        action='store_const', dest='log_level', const=log.DEBUG,
+        default=log.WARNING
+    )
+    return parser.parse_args()
+
 def main():
     # Goal of program: train multiple classifiers and cross-validate each.
     # Output scores of classifiers on a test set.
+
+    args = parse_args()
+    log.basicConfig(level=args.log_level)
 
     X = pd.read_csv('full-corpus.csv')
 
