@@ -2,6 +2,7 @@
 
 import argparse
 import logging as log
+import numpy as np
 import pandas as pd
 
 from sklearn.metrics import accuracy_score
@@ -71,7 +72,10 @@ def main():
     args = parse_args()
     log.basicConfig(level=args.log_level)
 
-    for ds_name in 'san-analytics', 'stanford':
+    for ds_name in (
+                    'san-analytics',
+                    #'stanford'
+                    ):
         X, y = load_dataset(ds_name)
 
         log.debug("Splitting train and test data")
@@ -89,6 +93,23 @@ def main():
 
         score = accuracy_score(y_test, y_predict)
         print(f"{ds_name} | NBTweetClassifier score: {score}")
+
+        good_path = f'{ds_name}/good_predict.csv'
+        log.debug(f"Dumping good predictions to {good_path}")
+        good_predict_index = np.argwhere(y_predict == y_test).ravel()
+        good_predict = pd.concat([X_test.iloc[good_predict_index],
+                                  y_predict[good_predict_index]
+                                  ], axis=1)
+        good_predict.to_csv(good_path, encoding='utf-8', index=False)
+
+        bad_path = f'{ds_name}/bad_predict.csv'
+        log.debug(f"Dumping bad predictions to {bad_path}")
+        bad_predict_index = np.argwhere(y_predict != y_test).ravel()
+        bad_predict = pd.concat([X_test.iloc[bad_predict_index],
+                                 y_test[bad_predict_index].rename('sentiment_expected'),
+                                 y_predict[bad_predict_index].rename('sentiment_actual')
+                                 ], axis=1)
+        bad_predict.to_csv(bad_path, encoding='utf-8', index=False)
 
 if __name__ == '__main__':
     main()

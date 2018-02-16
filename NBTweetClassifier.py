@@ -53,7 +53,7 @@ class NBTweetClassifier(BaseEstimator):
 
         tweets = X['tweet_text']
         y = [self._predict(tweet, index) for index, tweet in enumerate(tweets)]
-        return pd.Series(y)
+        return pd.Series(y, name='sentiment')
     
     def _predict(self, tweet, tweet_index):
         return max(self.classes_, key=lambda class_: self._score(class_, tweet, tweet_index))
