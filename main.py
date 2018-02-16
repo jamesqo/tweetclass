@@ -2,8 +2,9 @@
 
 import pandas as pd
 
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelBinarizer
+from sklearn.preprocessing import LabelBinarizer, label_binarize
 
 def main():
     # Goal of program: train multiple classifiers and cross-validate each.
@@ -11,8 +12,12 @@ def main():
     # Multiclass prediction will be handled using OvA.
 
     X = pd.read_csv('full-corpus.csv')
+
     y = X['Sentiment']
     X.drop('Sentiment', axis=1, inplace=True)
+    y_classes = list(set(y))
+    Y = label_binarize(y, classes=y_classes)
+    Y = pd.DataFrame(Y, columns=y_classes)
 
     X.drop(['TweetId', 'TweetDate'], axis=1, inplace=True)
 
@@ -24,15 +29,21 @@ def main():
     X.drop('Topic', axis=1, inplace=True)
     X = pd.concat([X, X_topic_bin], axis=1)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y,
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y,
                                                         test_size=0.2,
                                                         random_state=42)
 
-    print(X_train.head(n=10))
-    print(y_train.head(n=10))
+    #print(X_train.head(n=10))
+    #print(Y_train.head(n=10))
 
-    #bayes_clf = NBClassifier()
-    #bayes_clf.
+    bayes_clf = NBClassifier()
+    ovr_clf = OneVsRestClassifier(bayes_clf)
+
+    ovr_clf.fit(X_train, Y_train)
+    Y_predict = ovr_clf.predict(X_test)
+    score = accuracy_score(Y_test, Y_predict)
+
+    print(f"NBClassifier + OvA score: {score}")
 
 if __name__ == '__main__':
     main()
