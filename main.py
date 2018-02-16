@@ -22,10 +22,14 @@ def parse_args():
     return parser.parse_args()
 
 def load_dataset(name):
-    if name == 'stanford':
-        pass
-    elif name == 'san-analytics':
-        return load_san_analytics_dataset()
+    log.debug(f"Loading {name} dataset")
+    if name == 'san-analytics':
+        result = load_san_analytics_dataset()
+    elif name == 'stanford':
+        result = load_stanford_dataset()
+    
+    log.debug(f"Finished loading {name} dataset")
+    return result
 
 def load_san_analytics_dataset():
     X = pd.read_csv('san-analytics/full-corpus.csv')
@@ -48,6 +52,18 @@ def load_san_analytics_dataset():
 
     X.rename(columns={'TweetText': 'tweet_text'}, inplace=True)
     y.rename('sentiment', inplace=True)
+
+    return X, y
+
+def load_stanford_dataset():
+    X = pd.read_csv('stanford/traindata.csv',
+                    header=None,
+                    usecols=[0, 5],
+                    names=['sentiment', 'tweet_text'],
+                    encoding='latin-1')
+
+    y = X['sentiment']
+    X.drop('sentiment', axis=1, inplace=True)
 
     return X, y
 
