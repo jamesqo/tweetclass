@@ -59,7 +59,7 @@ def main():
     y_predict = bayes_clf.predict(X_test)
 
     score = accuracy_score(y_test, y_predict)
-    print(f"NBClassifier + OvA score: {score}")
+    print(f"NBTweetClassifier score: {score}")
 
 if __name__ == '__main__':
     main()
